@@ -4,8 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults.buttonColors
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,6 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.walcker.jettrivia.presentation.theme.mDarkPurple
 import com.walcker.jettrivia.presentation.theme.mLightPurple
+import java.math.BigDecimal
+import java.sql.CallableStatement
 
 @Composable
 fun ShowProgressBar(
@@ -24,15 +25,14 @@ fun ShowProgressBar(
     listQuestionSize: Int
 ) {
 
-    val gradient = Brush.linearGradient(
-        listOf(
-            Color(0xFF9F5075),
-            Color(0xFFBE6BE5)
-        )
-    )
-
-    val percentageOfList = (score / listQuestionSize)
-    val progressFactor = remember(score) { mutableStateOf(percentageOfList) }
+    val scoreBig: BigDecimal = remember {
+        BigDecimal(score).setScale(10, BigDecimal.ROUND_HALF_UP)
+    }
+    val listQuestionSizeBig: BigDecimal = remember {
+        BigDecimal(listQuestionSize).setScale(10, BigDecimal.ROUND_HALF_UP)
+    }
+    val percentageOfList = remember{(scoreBig / listQuestionSizeBig)}
+    val progressFactor = remember { mutableStateOf(percentageOfList) }
 
     Row(
         modifier = Modifier
@@ -57,18 +57,15 @@ fun ShowProgressBar(
             .background(Color.Transparent),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Button(
+
+        LinearProgressIndicator(
+            progress = progressFactor.value.toFloat(),
+            backgroundColor = Color.Transparent,
+            color = Color.White,
             modifier = Modifier
-                .fillMaxWidth(progressFactor.value.toFloat())
-                .background(brush = gradient),
-            enabled = false,
-            elevation = null,
-            colors = buttonColors(
-                backgroundColor = Color.Transparent,
-                disabledBackgroundColor = Color.Transparent
-            ),
-            contentPadding = PaddingValues(1.dp),
-            onClick = { }) {
-        }
+                .fillMaxSize()
+                .padding(6.dp)
+                .clip(RoundedCornerShape(34.dp))
+        )
     }
 }

@@ -1,37 +1,31 @@
 package com.walcker.jettrivia.presentation.component
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.walcker.core.model.QuestionItemUI
 import com.walcker.jettrivia.presentation.theme.mDarkPurple
-import com.walcker.jettrivia.presentation.theme.mLightGray
-import com.walcker.jettrivia.presentation.theme.mOffWhite
 
 @Composable
 fun TriviaHomeDisplay(
     questionsFromJson: MutableList<QuestionItemUI>
 ) {
 
-    val questionIndex = remember { mutableStateOf(0) }
+    val questionIndex = remember { mutableStateOf(1) }
     val question = try {
-        questionsFromJson[questionIndex.value]
+        questionsFromJson[questionIndex.value -1]
     } catch (ex: Exception) {
         null
     }
@@ -52,21 +46,13 @@ fun TriviaHomeDisplay(
             horizontalAlignment = Alignment.Start
         ) {
 
-            if (questionIndex.value >= 3) ShowProgressBar(score = questionIndex.value, listQuestionSize = questionsFromJson.size)
+            ShowProgressBar(score = questionIndex.value, listQuestionSize = questionsFromJson.size)
 
-            Text(
-                text = (questionIndex.value).toString(),
-                modifier = Modifier
-                    .clip(shape = RoundedCornerShape(23.dp))
-                    .padding(start = 12.dp, top = 6.dp),
-                color = mOffWhite,
-                textAlign = TextAlign.Start
-            )
+            TextTotalAnswer(total = listHitAnswer, text = "Total de acertos: ", color = Color.Green)
 
-            QuestionTracker(
-                counter = questionIndex.value,
-                outOf = questionsFromJson.size
-            )
+            TextTotalAnswer(total = listWrongAnswer, text = "Total de errors: ", color = Color.Red)
+
+            QuestionTracker(counter = questionIndex.value, outOf = questionsFromJson.size)
 
             DrawDottedLine(pathEffect = pathEffect)
 
@@ -85,13 +71,10 @@ fun TriviaHomeDisplay(
                         if (questionItemUI.answer == answer) {
                             listHitAnswer.value += 1
                         } else {
-                            listWrongAnswer.value + 1
+                            listWrongAnswer.value += 1
                         }
                     }
                 }
-                Text(text = listHitAnswer.value.toString())
-
-                Text(text = listWrongAnswer.value.toString())
 
                 when (answerCheckState.value) {
                     true -> Icon(
@@ -129,7 +112,7 @@ fun TriviaHomeDisplay(
             } else {
                 ButtonTrivia(
                     enabled = false,
-                    color = Color.Gray.copy(alpha = 0.1f),
+                    color = Color.Gray,
                     text = "Next",
                     onNextClicked = {}
                 )
@@ -137,6 +120,3 @@ fun TriviaHomeDisplay(
         }
     }
 }
-
-
-
