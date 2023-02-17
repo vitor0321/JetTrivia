@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -29,12 +28,12 @@ import com.walcker.jettrivia.presentation.theme.mOffWhite
 
 @Composable
 fun AnswerChoice(
-    choiceState: MutableList<String>,
+    choiceListState: List<String>,
+    answerCheckState: MutableState<Boolean?>,
     answerState: MutableState<Int?>,
-    correctAnswerState: MutableState<Boolean?>,
-    updateAnswer: (Int) -> Unit
+    answerFromUser: (String, Int) -> Unit
 ) {
-    choiceState.forEachIndexed { index, answerText ->
+    choiceListState.forEachIndexed { index, answerText ->
         Row(
             modifier = Modifier
                 .padding(3.dp)
@@ -57,27 +56,29 @@ fun AnswerChoice(
                 .background(Color.Transparent),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            RadioButton(modifier = Modifier.padding(start = 16.dp),
+            RadioButton(
+                modifier = Modifier.padding(start = 16.dp),
+                enabled = answerCheckState.value == null,
                 selected = (answerState.value == index),
                 colors = RadioButtonDefaults.colors(
                     selectedColor =
-                    if (correctAnswerState.value == true && index == answerState.value) {
-                        Color.Green.copy(alpha = 0.2f)
+                    if (answerCheckState.value == true && index == answerState.value) {
+                        Color.Green.copy(alpha = 0.6f)
                     } else {
-                        Color.Red.copy(alpha = 0.2f)
+                        Color.Red.copy(alpha = 0.6f)
                     },
                     unselectedColor = mOffWhite,
                 ),
-                onClick = { updateAnswer(index) }
+                onClick = { answerFromUser(answerText, index) }
             )
             val annotatedString = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
                         fontWeight = FontWeight.Light,
-                        color = if (correctAnswerState.value == true && index == answerState.value) {
-                            Color.Green
-                        } else if (correctAnswerState.value == false && index == answerState.value) {
-                            Color.Red
+                        color = if (answerCheckState.value == true && index == answerState.value) {
+                            Color.Green.copy(alpha = 0.6f)
+                        } else if (answerCheckState.value == false && index == answerState.value) {
+                            Color.Red.copy(alpha = 0.6f)
                         } else mOffWhite,
                         fontSize = 17.sp
                     )
